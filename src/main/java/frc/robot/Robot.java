@@ -4,9 +4,9 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+//import com.ctre.phoenix.motorcontrol.ControlMode;
+//import com.ctre.phoenix.motorcontrol.NeutralMode;
+//import com.ctre.phoenix.motorcontrol.can.SSPX; // Ron i swear i will delete this line if its the last thing i do 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -24,7 +24,7 @@ public class Robot extends TimedRobot {
   private static final String kNothingAuto = "do nothing";
   private static final String kConeAuto = "cone";
   private static final String kCubeAuto = "cube";
-  private String m_autoSelected;
+  private String m_autoSelected; 
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   /*
@@ -34,23 +34,27 @@ public class Robot extends TimedRobot {
    * Change kBrushed to kBrushless if you are using NEO's.
    * Use the appropriate other class if you are using different controllers.
    */
-  CANSparkMax driveLeftSpark = new CANSparkMax(1, MotorType.kBrushed);
-  CANSparkMax driveRightSpark = new CANSparkMax(2, MotorType.kBrushed);
-  VictorSPX driveLeftVictor = new VictorSPX(3);
-  VictorSPX driveRightVictor = new VictorSPX(4);
+  CANSparkMax driveLeftLeader = new CANSparkMax(1, MotorType.kBrushless);
+  CANSparkMax driveRightLeader = new CANSparkMax(2, MotorType.kBrushless);
+  CANSparkMax driveLeftFollower = new CANSparkMax(3, MotorType.kBrushless);
+  CANSparkMax driveRightFollower = new CANSparkMax(4, MotorType.kBrushless);
 
   /*
    * Mechanism motor controller instances.
    * 
    * Like the drive motors, set the CAN id's to match your robot or use different
-   * motor controller classses (TalonFX, TalonSRX, Spark, VictorSP) to match your
+   * motor controller classses (TalonFX, TalonSRX, Spark, Spark2SP) to match your
    * robot.
    * 
    * The arm is a NEO on Everybud.
    * The intake is a NEO 550 on Everybud.
    */
-  CANSparkMax arm = new CANSparkMax(5, MotorType.kBrushless);
+  CANSparkMax armLeader = new CANSparkMax(4, MotorType.kBrushless);
+  CANSparkMax armFollower = new CANSparkMax(7, MotorType.kBrushless); 
+
   CANSparkMax intake = new CANSparkMax(6, MotorType.kBrushless);
+
+  
 
   /**
    * The starter code uses the most generic joystick class.
@@ -134,19 +138,24 @@ public class Robot extends TimedRobot {
      * to the set() methods. Push the joystick forward. Reverse the motor
      * if it is going the wrong way. Repeat for the other 3 motors.
      */
-    driveLeftSpark.setInverted(false);
-    driveLeftVictor.setInverted(false);
-    driveRightSpark.setInverted(false);
-    driveRightVictor.setInverted(false);
+    driveLeftLeader.setInverted(false);
+    driveLeftFollower.setInverted(false);
+    driveRightLeader.setInverted(false);
+    driveRightFollower.setInverted(false);
 
     /*
      * Set the arm and intake to brake mode to help hold position.
      * If either one is reversed, change that here too. Arm out is defined
      * as positive, arm in is negative.
      */
-    arm.setInverted(true);
-    arm.setIdleMode(IdleMode.kBrake);
-    arm.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
+    armLeader.setInverted(true);
+    armLeader.setIdleMode(IdleMode.kBrake);
+    armLeader.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
+    
+    armFollower.setIdleMode(IdleMode.kBrake);
+    armFollower.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
+    armFollower.follow(armLeader,true);
+    
     intake.setInverted(false);
     intake.setIdleMode(IdleMode.kBrake);
   }
@@ -159,25 +168,20 @@ public class Robot extends TimedRobot {
    * @param turn    Desired turning speed. Positive is counter clockwise from
    *                above.
    */
-  public void setDriveMotors(double forward, double turn) {
-    SmartDashboard.putNumber("drive forward power (%)", forward);
-    SmartDashboard.putNumber("drive turn power (%)", turn);
+  public void setDriveMotors(double left, double right) {
+    SmartDashboard.putNumber("drive left power (%)", left);
+    SmartDashboard.putNumber("drive right power (%)", right);
 
-    /*
-     * positive turn = counter clockwise, so the left side goes backwards
-     */
-    double left = forward - turn;
-    double right = forward + turn;
 
     SmartDashboard.putNumber("drive left power (%)", left);
     SmartDashboard.putNumber("drive right power (%)", right);
 
     // see note above in robotInit about commenting these out one by one to set
     // directions.
-    driveLeftSpark.set(left);
-    driveLeftVictor.set(ControlMode.PercentOutput, left);
-    driveRightSpark.set(right);
-    driveRightVictor.set(ControlMode.PercentOutput, right);
+    driveLeftLeader.set(left);
+    driveLeftFollower.set(left);
+    driveRightLeader.set(right);
+    driveRightFollower.set(right);
   }
 
   /**
@@ -185,11 +189,12 @@ public class Robot extends TimedRobot {
    * 
    * @param percent
    */
-  public void setArmMotor(double percent) {
-    arm.set(percent);
+  public void setArmMotor(double percent) { 
+    armLeader.set(percent); 
+    
     SmartDashboard.putNumber("arm power (%)", percent);
-    SmartDashboard.putNumber("arm motor current (amps)", arm.getOutputCurrent());
-    SmartDashboard.putNumber("arm motor temperature (C)", arm.getMotorTemperature());
+    SmartDashboard.putNumber("arm motor current (amps)", armLeader.getOutputCurrent());
+    SmartDashboard.putNumber("arm motor temperature (C)", armLeader.getMotorTemperature());
   }
 
   /**
@@ -220,10 +225,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    driveLeftSpark.setIdleMode(IdleMode.kBrake);
-    driveLeftVictor.setNeutralMode(NeutralMode.Brake);
-    driveRightSpark.setIdleMode(IdleMode.kBrake);
-    driveRightVictor.setNeutralMode(NeutralMode.Brake);
+    //might want to change kBrake to kCoast
+    driveLeftLeader.setIdleMode(IdleMode.kCoast);
+    driveLeftFollower.setIdleMode(IdleMode.kCoast);
+    driveRightLeader.setIdleMode(IdleMode.kCoast);
+    driveRightFollower.setIdleMode(IdleMode.kCoast);
 
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
@@ -281,10 +287,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    driveLeftSpark.setIdleMode(IdleMode.kCoast);
-    driveLeftVictor.setNeutralMode(NeutralMode.Coast);
-    driveRightSpark.setIdleMode(IdleMode.kCoast);
-    driveRightVictor.setNeutralMode(NeutralMode.Coast);
+    driveLeftLeader.setIdleMode(IdleMode.kCoast);
+    driveLeftFollower.setIdleMode(IdleMode.kCoast);
+    driveRightLeader.setIdleMode(IdleMode.kCoast);
+    driveRightFollower.setIdleMode(IdleMode.kCoast);
 
     lastGamePiece = NOTHING;
   }
