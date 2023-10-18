@@ -34,10 +34,10 @@ public class Robot extends TimedRobot {
    * Change kBrushed to kBrushless if you are using NEO's.
    * Use the appropriate other class if you are using different controllers.
    */
-  CANSparkMax driveLeftLeader = new CANSparkMax(1, MotorType.kBrushless);
-  CANSparkMax driveRightLeader = new CANSparkMax(2, MotorType.kBrushless);
-  CANSparkMax driveLeftFollower = new CANSparkMax(3, MotorType.kBrushless);
-  CANSparkMax driveRightFollower = new CANSparkMax(4, MotorType.kBrushless);
+  CANSparkMax driveLeftLeader = new CANSparkMax(3, MotorType.kBrushless);
+  CANSparkMax driveRightLeader = new CANSparkMax(5, MotorType.kBrushless);
+  CANSparkMax driveLeftFollower = new CANSparkMax(6, MotorType.kBrushless);
+  CANSparkMax driveRightFollower = new CANSparkMax(2, MotorType.kBrushless);
 
   /*
    * Mechanism motor controller instances.
@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
   CANSparkMax armLeader = new CANSparkMax(4, MotorType.kBrushless);
   CANSparkMax armFollower = new CANSparkMax(7, MotorType.kBrushless); 
 
-  CANSparkMax intake = new CANSparkMax(6, MotorType.kBrushless);
+  CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);
 
   
 
