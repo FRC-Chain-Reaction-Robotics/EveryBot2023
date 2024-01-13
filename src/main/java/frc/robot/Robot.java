@@ -17,7 +17,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 /*basically have to create a PID loop */
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 
 
@@ -29,7 +28,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -66,7 +64,7 @@ public class Robot extends TimedRobot {
  
 
 
-  SlewRateLimiter filter = new SlewRateLimiter(0.5);
+  SlewRateLimiter filter = new SlewRateLimiter(0.2);
   /*
    * Mechanism motor controller instances.
    *
@@ -232,6 +230,15 @@ public class Robot extends TimedRobot {
     driveLeftFollower.set(filter.calculate(left));
     driveRightLeader.set(filter.calculate(right));
     driveRightFollower.set(filter.calculate(right));
+
+    /* Chat gpt suggestion fix for next meeting
+    
+    driveLeftLeader.set(leftController.calculate(driveLeftLeader.getEncoder().getVelocity(), left));
+    driveLeftFollower.set(leftController.calculate(driveLeftFollower.getEncoder().getVelocity(), left));
+    driveRightLeader.set(rightController.calculate(driveRightLeader.getEncoder().getVelocity(), right));
+    driveRightFollower.set(rightController.calculate(driveRightFollower.getEncoder().getVelocity(), right));*/ 
+
+
   }
  
 
