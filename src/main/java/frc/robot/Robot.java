@@ -177,6 +177,11 @@ public class Robot extends TimedRobot {
 
     leftController = new PIDController(driveKp, 0, 0);
     rightController = new PIDController(driveKp, 0, 0);
+
+    leftController.setTolerance(5,10);
+    rightController.setTolerance(5,10);
+    leftController.atSetpoint();
+    rightController.atSetpoint();
    
     /*
      * You will need to change some of these from false to true.
@@ -226,19 +231,24 @@ public class Robot extends TimedRobot {
 
     // see note above in robotInit about commenting these out one by one to set
     // directions.
-    driveLeftLeader.set(filter.calculate(left));
+    /*     driveLeftLeader.set(filter.calculate(left));
     driveLeftFollower.set(filter.calculate(left));
     driveRightLeader.set(filter.calculate(right));
-    driveRightFollower.set(filter.calculate(right));
+    driveRightFollower.set(filter.calculate(right));  */
 
-    /* Chat gpt suggestion fix for next meeting
+    double leftSpeed = driveLeftLeader.getEncoder().getVelocity();
+    double leftOutput = leftController.calculate(leftSpeed, left);
+    driveLeftLeader.set(leftOutput);
+    driveLeftFollower.set(leftOutput);
+
+    double rightSpeed = driveRightLeader.getEncoder().getVelocity();
+    double rightOutput = rightController.calculate(rightSpeed, right);
+    driveRightLeader.set(rightOutput);
+    driveRightFollower.set(rightOutput);
+
+  
     
-    driveLeftLeader.set(leftController.calculate(driveLeftLeader.getEncoder().getVelocity(), left));
-    driveLeftFollower.set(leftController.calculate(driveLeftFollower.getEncoder().getVelocity(), left));
-    driveRightLeader.set(rightController.calculate(driveRightLeader.getEncoder().getVelocity(), right));
-    driveRightFollower.set(rightController.calculate(driveRightFollower.getEncoder().getVelocity(), right));*/ 
-
-
+    
   }
  
 
