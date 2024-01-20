@@ -26,8 +26,6 @@ import edu.wpi.first.wpilibj.*;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -82,7 +80,8 @@ public class Robot extends TimedRobot {
   CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);// <- id here has problems
 
 
- 
+  Solenoid extendSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+  Solenoid retractSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
 
 
   /**
@@ -212,6 +211,9 @@ public class Robot extends TimedRobot {
    
     intake.setInverted(false);
     intake.setIdleMode(IdleMode.kBrake);
+
+    retractSolenoid.set(false);
+    extendSolenoid.set(false);
   }
 
 
@@ -399,7 +401,21 @@ public class Robot extends TimedRobot {
     }
     setArmMotor(armPower);
    
- 
+    boolean extendOn = false;
+    if(j.getRawButton(1)){
+      extendOn=!extendOn;
+      retractSolenoid.set(false);
+      extendSolenoid.set(extendOn);
+    }
+
+    boolean retractOn = false;
+    if(j.getRawButton(2))
+    {
+      retractOn = !retractOn;
+      extendSolenoid.set(false);
+      retractSolenoid.set(retractOn);
+    }
+
     double intakePower;
     int intakeAmps;
     if (j.getRawAxis(3) > 0.7) { // right trigger
@@ -423,7 +439,6 @@ public class Robot extends TimedRobot {
       intakeAmps = 0;
     }
     setIntakeMotor(intakePower, intakeAmps);
-
 
     /*
      * Negative signs here because the values from the analog sticks are backwards
