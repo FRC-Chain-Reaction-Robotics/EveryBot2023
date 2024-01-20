@@ -10,23 +10,18 @@ package frc.robot;
 //import com.ctre.phoenix.motorcontrol.NeutralMode;
 //import com.ctre.phoenix.motorcontrol.can.SSPX; // Ron i swear i will delete this line if its the last thing i do
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 
 /*basically have to create a PID loop */
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj2.command.PIDSubsystem;
-
-
-import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj.*;
-
-
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,9 +42,11 @@ public class Robot extends TimedRobot {
    */
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   public static final double kMaxSpeed = 4466; //RPM
-  public static PIDController leftController;
-  public static PIDController rightController;
-  public static double driveKp = .001;
+  public static SparkMaxPIDController leftController;
+  public static SparkMaxPIDController rightController;
+  public static double driveKp = .01;
+  public static RelativeEncoder encoderLeft;
+  public static RelativeEncoder encoderRight;
   /*
    * Drive motor controller instances.
    *
@@ -62,7 +59,7 @@ public class Robot extends TimedRobot {
   CANSparkMax driveLeftFollower = new CANSparkMax(2, MotorType.kBrushless);
   CANSparkMax driveRightFollower = new CANSparkMax(6, MotorType.kBrushless);
  
-
+  
 
   SlewRateLimiter filter = new SlewRateLimiter(0.2);
   /*
@@ -79,7 +76,7 @@ public class Robot extends TimedRobot {
   CANSparkMax armFollower = new CANSparkMax(4, MotorType.kBrushless); // might have problems
 
 
-  CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);// <- id here has problems
+  //CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);// <- id here has problems
 
 
  
@@ -94,8 +91,9 @@ public class Robot extends TimedRobot {
    * mode (switch set to X on the bottom) or a different controller
    * that you feel is more comfortable.
    */
-  Joystick j = new Joystick(1); // Was 0 but changed due to testing
+  XboxController j = new XboxController(1); // Was 0 but changed due to testing
 
+  DifferentialDrive dt = new DifferentialDrive(new MotorControllerGroup(driveLeftLeader, driveLeftFollower), new MotorControllerGroup(driveRightLeader, driveRightFollower));
 
   /*
    * Magic numbers. Use these to adjust settings.
@@ -175,13 +173,18 @@ public class Robot extends TimedRobot {
 
 
 
-    leftController = new PIDController(driveKp, 0, 0);
-    rightController = new PIDController(driveKp, 0, 0);
+    leftController = driveLeftLeader.getPIDController();
+    rightController = driveRightLeader.getPIDController();
 
-    leftController.setTolerance(5,10);
-    rightController.setTolerance(5,10);
-    leftController.atSetpoint();
-    rightController.atSetpoint();
+    encoderLeft = driveLeftLeader.getEncoder();
+    encoderRight = driveRightLeader.getEncoder();
+
+
+    leftController.setFeedbackDevice(encoderLeft);
+    rightController.setFeedbackDevice(encoderRight);
+
+    leftController.setP(driveKp);
+    rightController.setP(driveKp);
    
     /*
      * You will need to change some of these from false to true.
@@ -191,8 +194,8 @@ public class Robot extends TimedRobot {
      * if it is going the wrong way. Repeat for the other 3 motors.
      */
      
-    driveLeftLeader.setInverted(false);
-    driveLeftFollower.setInverted(false);
+    driveLeftLeader.setInverted(true);
+    driveLeftFollower.setInverted(true);
     driveRightLeader.setInverted(false);
     driveRightFollower.setInverted(false);
 
@@ -202,16 +205,16 @@ public class Robot extends TimedRobot {
      * If either one is reversed, change that here too. Arm out is defined
      * as positive, arm in is negative.
      */
-    armLeader.setInverted(true);
+    /*armLeader.setInverted(true);
     armLeader.setIdleMode(IdleMode.kBrake);
     armLeader.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
    
     armFollower.setIdleMode(IdleMode.kBrake);
     armFollower.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
-    armFollower.follow(armLeader,true);
+    armFollower.follow(armLeader,true); */
    
-    intake.setInverted(false);
-    intake.setIdleMode(IdleMode.kBrake);
+   // intake.setInverted(false);
+   // intake.setIdleMode(IdleMode.kBrake);
   }
 
 
@@ -224,32 +227,28 @@ public class Robot extends TimedRobot {
    *                above.
    */
  
-  public void setDriveMotors(double left, double right) {
+  /*public void setDriveMotors(double left, double right) {
     SmartDashboard.putNumber("drive left power (%)", left);
     SmartDashboard.putNumber("drive right power (%)", right);
 
 
     // see note above in robotInit about commenting these out one by one to set
     // directions.
-    /*     driveLeftLeader.set(filter.calculate(left));
-    driveLeftFollower.set(filter.calculate(left));
-    driveRightLeader.set(filter.calculate(right));
-    driveRightFollower.set(filter.calculate(right));  */
 
-    double leftSpeed = driveLeftLeader.getEncoder().getVelocity();
-    double leftOutput = leftController.calculate(leftSpeed, left);
-    driveLeftLeader.set(leftOutput);
-    driveLeftFollower.set(leftOutput);
+      
+      This is the code in WPILib
+      driveRightLeader.set(rightController.calculate(encoder.getDistance(), setpoint)); 
+      
+      //driveRightLeader.set(rightController.calculate(encoderLeft.getDistance(), -100));
+      driveRightLeader.set(filter.calculate(right));  
+      //driveLeftLeader.set(leftController.calculate(encoderRight.getDistance(), 100));
+      driveLeftLeader.set(filter.calculate(left));
 
-    double rightSpeed = driveRightLeader.getEncoder().getVelocity();
-    double rightOutput = rightController.calculate(rightSpeed, right);
-    driveRightLeader.set(rightOutput);
-    driveRightFollower.set(rightOutput);
 
   
     
     
-  }
+  } */
  
 
 
@@ -274,13 +273,13 @@ public class Robot extends TimedRobot {
    * @param percent desired speed
    * @param amps current limit
    */
-  public void setIntakeMotor(double percent, int amps) {
+  /*public void setIntakeMotor(double percent, int amps) {
     intake.set(percent);
     intake.setSmartCurrentLimit(amps);
     SmartDashboard.putNumber("intake power (%)", percent);
     SmartDashboard.putNumber("intake motor current (amps)", intake.getOutputCurrent());
     SmartDashboard.putNumber("intake motor temperature (C)", intake.getMotorTemperature());
-  }
+  } */
 
 
   /**
@@ -323,16 +322,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    if (m_autoSelected == kNothingAuto) {
+    /*if (m_autoSelected == kNothingAuto) {
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       //setDriveMotors(0.0, 0.0);
       setDriveMotors(-0.8,0.8); // added during start of ntx day 2
       return;
-    }
+    } */
 
 
-    double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
+  /*   double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
@@ -355,7 +354,7 @@ public class Robot extends TimedRobot {
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
-    }
+    } */
   }
    
   /**
@@ -384,7 +383,7 @@ public class Robot extends TimedRobot {
     //if (j.getRawButton(0) System.out.println(0);
 
 
-    double armPower;
+    /*double armPower;
     if (j.getRawButton(5)) { // might be 6 or 7
       // lower the arm
       armPower = -ARM_OUTPUT_POWER;
@@ -422,7 +421,7 @@ public class Robot extends TimedRobot {
       intakePower = 0.0;
       intakeAmps = 0;
     }
-    setIntakeMotor(intakePower, intakeAmps);
+    setIntakeMotor(intakePower, intakeAmps); */
 
 
     /*
@@ -430,26 +429,18 @@ public class Robot extends TimedRobot {
      * from what we want. Forward returns a negative when we want it positive.
      */
     // left stick up & down, right stick up and downs
-    //setDriveMotors(filter.calculate(j.getRawAxis(1)),filter.calculate(j.getRawAxis(5)));
+    
+    
    
    
     //setDriveMotors(-j.getRawAxis(1),j.getRawAxis(5)); //original working
    
-   
-    double leftDesiredSpeed = -j.getRawAxis(1) * kMaxSpeed;
-    double leftActualSpeed = driveLeftLeader.getEncoder().getVelocity();
-    double rightDesiredSpeed = j.getRawAxis(5) * kMaxSpeed;
-    double rightActualSpeed = driveRightLeader.getEncoder().getVelocity();
-    //nullPointerException on leftController/rightController
-    setDriveMotors(leftController.calculate(leftActualSpeed, leftDesiredSpeed) - (.2*j.getRawAxis(1)),
-      rightController.calculate(rightActualSpeed, rightDesiredSpeed) + (.2*j.getRawAxis(5))
-    );
-    SmartDashboard.putNumber("Left Desired", leftDesiredSpeed);
-    SmartDashboard.putNumber("Left Actual", leftActualSpeed);
-    SmartDashboard.putNumber("Left Output", driveLeftLeader.get());
-    SmartDashboard.putNumber("Right Desired", rightDesiredSpeed);
-    SmartDashboard.putNumber("Right Actual", rightActualSpeed);
-    SmartDashboard.putNumber("Right Output", driveRightLeader.get());
+
+    /* .7 is the constant that controls the speed of the robot, if you want to increase it then increase the value by .1 */
+    dt.tankDrive(.7*(j.getLeftY()), .7*(j.getRightY()));
+
+    
+
 
 
     SmartDashboard.putNumber("Drive kP", driveKp);
