@@ -14,13 +14,13 @@ public class TurnToAngle extends PIDCommand{
             new PIDController(0.015, 0, 0),
             m_tank::getHeading,
             angle + m_tank.getHeading(),
-            output -> m_swerve.drive(0, 0, output, false),
+            output -> m_tank.drive(0, output),
             m_tank
         );
 
         getController().setTolerance(3);
 
-        this.m_swerve = m_swerve;
+        this.m_tank = m_tank;
     }
 
     @Override
@@ -31,6 +31,6 @@ public class TurnToAngle extends PIDCommand{
     
     @Override
     public void end(boolean interrupted) {
-        m_swerve.drive(0, 0, 0, false);
+        m_tank.drive(0, 0);
     }
 }

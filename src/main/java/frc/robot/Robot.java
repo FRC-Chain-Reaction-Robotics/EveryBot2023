@@ -6,8 +6,6 @@
 package frc.robot;
 
 
-<<<<<<< HEAD
-=======
 //import com.ctre.phoenix.motorcontrol.ControlMode;
 //import com.ctre.phoenix.motorcontrol.NeutralMode;
 //import com.ctre.phoenix.motorcontrol.can.SSPX; // Ron i swear i will delete this line if its the last thing i do
@@ -24,15 +22,13 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-<<<<<<< HEAD
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
-=======
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 
 import edu.wpi.first.math.controller.PIDController;
@@ -44,11 +40,12 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
   private Command m_autonomousCommand;
   private String m_autoSelected;
-<<<<<<< HEAD
-=======
+  
+
   /*
    * HowdyBot PID code
    */
+
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   public static final double kMaxSpeed = 4466; //RPM
   public static SparkMaxPIDController leftController;
@@ -167,7 +164,7 @@ public class Robot extends TimedRobot {
    * Speed to drive backwards in auto
    */
   static final double AUTO_DRIVE_SPEED = -0.25;
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
+
 
 
   /**
@@ -175,14 +172,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-<<<<<<< HEAD
     DataLog.start();
     m_robotContainer = new RobotContainer();    
   }
 
-
-=======
-    m_chooser.setDefaultOption("do nothing", kNothingAuto);
+    /*m_chooser.setDefaultOption("do nothing", kNothingAuto);
     m_chooser.addOption("cone and mobility", kConeAuto);
     m_chooser.addOption("cube and mobility", kCubeAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -211,7 +205,7 @@ public class Robot extends TimedRobot {
      * if it is going the wrong way. Repeat for the other 3 motors.
      */
      
-    driveLeftLeader.setInverted(true);
+   /* driveLeftLeader.setInverted(true);
     driveLeftFollower.setInverted(true);
     driveRightLeader.setInverted(false);
     driveRightFollower.setInverted(false);
@@ -232,7 +226,6 @@ public class Robot extends TimedRobot {
    
    // intake.setInverted(false);
    // intake.setIdleMode(IdleMode.kBrake);
-  }
 
 
   /**
@@ -297,8 +290,11 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("intake motor current (amps)", intake.getOutputCurrent());
     SmartDashboard.putNumber("intake motor temperature (C)", intake.getMotorTemperature());
   } */
+    // DataLog.start();
+    // m_robotContainer = new RobotContainer();    
+  
 
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
+
 
   /**
    * This method is called every 20 ms, no matter the mode. It runs after
@@ -436,28 +432,13 @@ public class Robot extends TimedRobot {
    
    
     //setDriveMotors(-j.getRawAxis(1),j.getRawAxis(5)); //original working
-   
+
 
     /* .7 is the constant that controls the speed of the robot, if you want to increase it then increase the value by .1 */
-<<<<<<< HEAD
-<<<<<<< HEAD
-    
-
-    
-=======
-=======
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
     dt.tankDrive(.7*(j.getLeftY()), .7*(j.getRightY()));
 
     
-
-<<<<<<< HEAD
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
-=======
->>>>>>> 63ea86c06e98d45df410bf484757d355a98d5f2c
-
-
-
+    /* .7 is the constant that controls the speed of the robot, if you want to increase it then increase the value by .1 */
 
    
    
