@@ -2,7 +2,7 @@ package frc.robot.Subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-
+import com.kauailabs.navx.frc.AHRS;
 //import com.ctre.phoenix.motorcontrol.ControlMode;
 //import com.ctre.phoenix.motorcontrol.NeutralMode;
 //import com.ctre.phoenix.motorcontrol.can.SSPX; // Ron i swear i will delete this line if its the last thing i do
@@ -43,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 // import frc.robot.lib.PhotonCameraWrapper;
+import frc.robot.lib.NavX;
 
 public class Tank extends SubsystemBase{
  /*
@@ -78,24 +79,12 @@ public class Tank extends SubsystemBase{
   
 
   SlewRateLimiter filter = new SlewRateLimiter(0.2);
-  /*
-   * Mechanism motor controller instances.
-   *
-   * Like the drive motors, set the CAN id's to match your robot or use different
-   * motor controller classses (TalonFX, TalonSRX, Spark, Spark2SP) to match your
-   * robot.
-   *
-   * The arm is a NEO on Everybud.
-   * The intake is a NEO 550 on Everybud.
-   */
-  CANSparkMax armLeader = new CANSparkMax(7, MotorType.kBrushless); // <- id here has problems
-  CANSparkMax armFollower = new CANSparkMax(4, MotorType.kBrushless); // might have problems
 
 
   //CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);// <- id here has problems
 
 
- 
+  NavX navX = new NavX();
 
 
   /**
@@ -116,17 +105,7 @@ public class Tank extends SubsystemBase{
    */
   public static double output = 0.7;
 
-  /**
-   * How many amps the arm motor can use.
-   */
-  static final int ARM_CURRENT_LIMIT_A = 20;
-
-
-  /**
-   * Percent output to run the arm up/down at
-   */
-  static final double ARM_OUTPUT_POWER = 0.35;
-
+  
 
   /**  
    * How many amps the intake can use while picking up
@@ -152,10 +131,7 @@ public class Tank extends SubsystemBase{
   static final double INTAKE_HOLD_POWER = 0.07;
 
 
-  /**
-   * Time to extend or retract arm in auto
-   */
-  static final double ARM_EXTEND_TIME_S = 2.0;
+ 
 
 
   /**
@@ -216,18 +192,7 @@ public class Tank extends SubsystemBase{
     driveRightFollower.setInverted(false);
 
 
-    /*
-     * Set the arm and intake to brake mode to help hold position.
-     * If either one is reversed, change that here too. Arm out is defined
-     * as positive, arm in is negative.
-     */
-    /*armLeader.setInverted(true);
-    armLeader.setIdleMode(IdleMode.kBrake);
-    armLeader.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
-   
-    armFollower.setIdleMode(IdleMode.kBrake);
-    armFollower.setSmartCurrentLimit(ARM_CURRENT_LIMIT_A);
-    armFollower.follow(armLeader,true); */
+    
    
    // intake.setInverted(false);
    // intake.setIdleMode(IdleMode.kBrake);
@@ -276,19 +241,7 @@ public class Tank extends SubsystemBase{
  
 
 
-  /**
-   * Set the arm output power. Positive is out, negative is in.
-   *
-   * @param percent -1 to 1
-   */
-  public void setArmMotor(double percent) {
-    armLeader.set(percent);
-    // armFollower.set(percent); // used to test a troubleshoot
-    System.out.println(percent);
-    SmartDashboard.putNumber("arm power (%)", percent*100);
-    SmartDashboard.putNumber("arm motor current (amps)", armLeader.getOutputCurrent());
-    SmartDashboard.putNumber("arm motor temperature (C)", armLeader.getMotorTemperature());
-  }
+  
 
   public void setIdleMode(IdleMode idleMode){
     driveLeftLeader.setIdleMode(idleMode);
@@ -334,16 +287,29 @@ public class Tank extends SubsystemBase{
 
   public void evilMode()
   {
+    driveLeftLeader.setSmartCurrentLimit(45, 45);
+    driveLeftFollower.setSmartCurrentLimit(45, 45);
+    driveRightLeader.setSmartCurrentLimit(45, 45);
+    driveRightFollower.setSmartCurrentLimit(45, 45);
+
     output = 0.3;
   }
 
   public void fastMode()
   {
+    driveLeftLeader.setSmartCurrentLimit(25, 25);
+    driveLeftFollower.setSmartCurrentLimit(25, 25);
+    driveRightLeader.setSmartCurrentLimit(25, 25);
+    driveRightFollower.setSmartCurrentLimit(25, 25);
     output = 1;
   }
   
   public double getDistanceMeters()
   {
     return Math.max(encoderLeft.getPosition(),encoderRight.getPosition());
+  }
+
+  public double getHeading(){
+    return navX.getYaw();
   }
 }
